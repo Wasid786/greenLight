@@ -21,7 +21,7 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 		ID:        id,
 		CreatedAt: time.Now(),
 		Title:     "Fathi",
-		Year:      "1453",
+		Year:      1453,
 		Runtime:   102,
 		Genres:    []string{"drama", "History", "war"},
 		Version:   1,
