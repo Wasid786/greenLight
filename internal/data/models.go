@@ -20,6 +20,6 @@ type Models struct {
 
 func NewModels(db *sql.DB) Models {
 	return Models{
-		Movie: MovieModel{},
+		Movie: MovieModel{DB: db},
 	}
 }

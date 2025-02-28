@@ -81,11 +81,10 @@ func main() {
 
 // The openDB() function returns a sql.DB connection pool.
 func openDB(cfg config) (*sql.DB, error) {
-	// Use sql.Open() to create an empty connection pool, using the DSN from the config
-	// struct.
 	db, err := sql.Open("postgres", cfg.db.dsn)
 	if err != nil {
-		return nil, err
+		log.Println("Error opening DB:", err)
+		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
 	db.SetMaxOpenConns(cfg.db.maxOpenConns)
@@ -93,22 +92,20 @@ func openDB(cfg config) (*sql.DB, error) {
 
 	duration, err := time.ParseDuration(cfg.db.maxIdleTime)
 	if err != nil {
+		log.Println("Invalid max idle time:", err)
 		return nil, err
 	}
-
 	db.SetConnMaxIdleTime(duration)
 
-	// Create a context with a 5-second timeout deadline.
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	// Use PingContext() to establish a new connection to the database, passing in the
-	// context we created above as a parameter. If the connection couldn't be
-	// established successfully within the 5 second deadline, then this will return an
-	// error.
+
 	err = db.PingContext(ctx)
 	if err != nil {
-		return nil, err
+		log.Println("Database connection failed:", err)
+		return nil, fmt.Errorf("database connection failed: %w", err)
 	}
-	// Return the sql.DB connection pool.
+
+	log.Println("Database connection established successfully")
 	return db, nil
 }
