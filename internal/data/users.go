@@ -51,7 +51,7 @@ func (p *password) Matches(plaintextPassword string) (bool, error) {
 			return false, err
 		}
 	}
-	return false, nil
+	return true, nil
 }
 
 func ValidateEmail(v *validator.Validator, email string) {
