@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -42,6 +43,9 @@ type config struct {
 		password string
 		sender   string
 	}
+	cors struct {
+		trustedOrigins []string
+	}
 }
 
 // Update the application struct to hold a new Mailer instance.
@@ -64,15 +68,18 @@ func main() {
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
-	// Read the SMTP server configuration settings into the config struct, using the
-	// Mailtrap settings as the default values. IMPORTANT: If you're following along,
-	// make sure to replace the default values for smtp-username and smtp-password
-	// with your own Mailtrap credentials.
+
 	flag.StringVar(&cfg.smtp.host, "smtp-host", "smtp.mailtrap.io", "SMTP host")
 	flag.IntVar(&cfg.smtp.port, "smtp-port", 2525, "SMTP port")
 	flag.StringVar(&cfg.smtp.username, "smtp-username", "3fc9cc5c63403a", "SMTP username")
 	flag.StringVar(&cfg.smtp.password, "smtp-password", "8bb2d6764d71ce", "SMTP password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.example>", "SMTP sender")
+
+	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(val string) error {
+		cfg.cors.trustedOrigins = strings.Fields(val)
+		return nil
+	})
+
 	flag.Parse()
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 	db, err := openDB(cfg)
