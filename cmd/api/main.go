@@ -48,6 +48,9 @@ type config struct {
 	cors struct {
 		trustedOrigins []string
 	}
+	jwt struct {
+		secret string
+	}
 }
 
 // Update the application struct to hold a new Mailer instance.
@@ -78,6 +81,9 @@ func main() {
 	flag.StringVar(&cfg.smtp.username, "smtp-username", "3fc9cc5c63403a", "SMTP username")
 	flag.StringVar(&cfg.smtp.password, "smtp-password", "8bb2d6764d71ce", "SMTP password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.example>", "SMTP sender")
+	flag.StringVar(&cfg.jwt.secret, "jwt-secret", "", "JWT secret")
+	displayVersion := flag.Bool("version", false, "Display version and exit")
+	fmt.Println(displayVersion)
 
 	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(val string) error {
 		cfg.cors.trustedOrigins = strings.Fields(val)

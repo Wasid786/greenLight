@@ -3,8 +3,10 @@ package main
 import (
 	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
+	"github.com/pascaldekloe/jwt"
 	"greenlight.Wasid786/internal/data"
 	"greenlight.Wasid786/internal/validator"
 )
@@ -50,12 +52,33 @@ func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, 
 		app.invalidCredentialsResponse(w, r)
 		return
 	}
-	token, err := app.models.Tokens.New(user.ID, 24*time.Hour, data.ScopeAuthentication)
+	// token, err := app.models.Tokens.New(user.ID, 24*time.Hour, data.ScopeAuthentication)
+	// if err != nil {
+	// 	app.serverErrorResponse(w, r, err)
+	// 	return
+	// }
+	// err = app.writeJSON(w, http.StatusCreated, envelope{"authentication_token": token}, nil)
+	// if err != nil {
+	// 	app.serverErrorResponse(w, r, err)
+	// }
+
+	var claims jwt.Claims
+	claims.Subject = strconv.FormatInt(user.ID, 10)
+	claims.Issued = jwt.NewNumericTime(time.Now())
+	claims.NotBefore = jwt.NewNumericTime(time.Now())
+	claims.Expires = jwt.NewNumericTime(time.Now().Add(24 * time.Hour))
+	claims.Issuer = "greenlight.alexedwards.net"
+	claims.Audiences = []string{"greenlight.alexedwards.net"}
+	// Sign the JWT claims using the HMAC-SHA256 algorithm and the secret key from the
+	// application config. This returns a []byte slice containing the JWT as a base64-
+	// encoded string.
+	jwtBytes, err := claims.HMACSign(jwt.HS256, []byte(app.config.jwt.secret))
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-	err = app.writeJSON(w, http.StatusCreated, envelope{"authentication_token": token}, nil)
+	// Convert the []byte slice to a string and return it in a JSON response.
+	err = app.writeJSON(w, http.StatusCreated, envelope{"authentication_token": string(jwtBytes)}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

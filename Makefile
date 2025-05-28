@@ -17,7 +17,7 @@ help:
 
 .PHONY: run/api
 run/api:
-	go run ./cmd/api -db-dsn=${GREENLIGHT_DB_DSN}
+	@go run ./cmd/api -db-dsn=${GREENLIGHT_DB_DSN} -jwt-secret=${JWT_SECRET}
 
 ## Connect to database using psql
 .PHONY: db/psql
@@ -62,3 +62,6 @@ vendor:
 build/api:
 	@echo 'Building cmd/api...'
 	go build -o=./bin/api ./cmd/api
+
+direnv: loading .envrc
+direnv: export +GREENLIGHT_DB_DSN +JWT_SECRET
